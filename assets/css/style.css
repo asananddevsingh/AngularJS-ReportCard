@@ -1,5 +1,4 @@
 @charset "UTF-8";
-
 article,
 aside,
 details,
@@ -277,7 +276,6 @@ body {
     }
 }
 
-
 #content-main,
 #aside,
 #secondary-nav {
@@ -422,8 +420,6 @@ body {
         margin-bottom: 2em
     }
 }
-
-
 
 h1,
 h2,
@@ -596,7 +592,6 @@ table thead td {
     }
 }
 
-
 #main.purple .m-title-banner h1,
 #main.purple .m-title-banner p {
     color: white
@@ -652,7 +647,6 @@ table thead td {
 #main.purple table.no-theme tbody tr td {
     border: none
 }
-
 
 label,
 .label,
@@ -770,3 +764,96 @@ a:active {
     background-image: linear-gradient(top, #ce131b, #ed1c24)
 }
 
+
+/* Table CSS*/
+
+.index-table {
+    padding: 40px 0 0 0;
+}
+
+.index-table table td {
+    vertical-align: middle;
+}
+
+
+/* New record table*/
+
+.index-table table.new td.name {
+    width: 65%;
+}
+
+.index-table table.new td.name input {
+    width: 350px;
+}
+
+.index-table table.new td.marks {
+    width: 15%;
+    text-align: center;
+}
+
+.index-table table.new td.marks input {
+    width: 100px;
+    text-align: center;
+}
+
+.index-table table.new td:last-child {
+    width: 15%;
+    text-align: center;
+}
+
+
+/* Results table*/
+
+.index-table table.result td:first-child {
+    width: 5%;
+}
+
+.index-table table.result td.avatar {
+    width: 10%;
+    text-align: center;
+}
+
+.index-table table.result td.name {
+    width: 60%;
+}
+
+.index-table table.result td.name input {
+    width: 350px;
+}
+
+.index-table table.result td.marks {
+    width: 15%;
+    text-align: center;
+}
+
+.index-table table.result td.marks input {
+    width: 100px;
+    text-align: center;
+}
+
+.index-table table.result td.status {
+    width: 5%;
+    text-align: center;
+}
+
+.index-table table.result td:last-child {
+    width: 5%;
+    text-align: center;
+}
+
+.index-table table.result td:last-child img {
+    cursor: pointer;
+}
+
+.author {
+    text-align: center;
+    font-size: 12px;
+    color: #36033f;
+    position: relative;
+    bottom: -15px;
+    word-spacing: 2px;
+}
+
+#footer {
+    background-color: gainsboro;
+}
