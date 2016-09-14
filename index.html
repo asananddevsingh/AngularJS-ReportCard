@@ -28,7 +28,7 @@
 	<![endif]-->
 
     <!--<script src="assets/js/libs/modernizr-2.6.2.min.js"></script>-->
-    
+
     <script src="./assets/js/libs/angular.min.js"></script>
 
 </head>
@@ -37,7 +37,7 @@
     <form>
         <div id="outer-wrap">
             <div id="inner-wrap">
-                <div id="main" class="purple l-one-column" role="main" tabindex="0"  ng-app="appReportCard" ng-controller="ctrlReportCard">
+                <div id="main" class="purple l-one-column" role="main" tabindex="0" ng-app="appReportCard" ng-controller="ctrlReportCard">
                     <div class="l-margins">
                         <div id="content-container" class="clearfix index-table">
                             <div id="content-main">
@@ -51,13 +51,13 @@
                                     <tbody>
                                         <tr>
                                             <td class="name">
-                                                <input type="text" required placeholder="Student's name">
+                                                <input type="text" required placeholder="Student's name" ng-model="name">
                                             </td>
                                             <td class="marks">
-                                                <input type="number" required placeholder="marks">
+                                                <input type="number" required placeholder="marks" ng-model="marks">
                                             </td>
                                             <td class="edit">
-                                                <input type="submit" class="submit button primary" value="Submit">
+                                                <input type="button" class="submit button primary" value="Submit" ng-click="addNewResult(name, marks)">
                                             </td>
                                         </tr>
                                     </tbody>
@@ -76,7 +76,7 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                          <tr ng-repeat="r in studentsResult.result" ng-include="getTemplate(r)"></tr>
+                                        <tr ng-repeat="result in results" ng-include="getTemplate(result)"></tr>
                                     </tbody>
                                 </table>
                                 <hr>
@@ -99,7 +99,7 @@
                                             </td>
                                         </tr>
                                     </tbody>
-                                </table>                                
+                                </table>
                             </div>
                         </div>
                     </div>
@@ -111,43 +111,148 @@
                 </div>
             </div>
         </div>
-    </form>    
+    </form>
     <script type="text/javascript">
         var appRC = angular.module("appReportCard", []);
 
-            appRC.controller("ctrlReportCard", function ($scope) {
-                    $scope.studentsResult = {
-                        result: [
-                            {id: 1, name: "Anand Dev", marks: 35},
-                            {id: 2, name: "Sam hog", marks: 90},
-                            {id: 3, name: "John Will", marks: 65}
+        appRC.factory("factResult", function () {
+            function Result(){}
+            Result.prototype.toggle = function(){
+                this.isSelected = !this.isSelected;
+            }
+            return function (defaults){
+                var result = new Result();
+                result.id = defaults.id;
+                result.name = defaults.name || '';
+                result.marks = defaults.marks || 0;
+                return result;
+            }
+        })
+
+        appRC.factory("factResultStorage", function(factResult){
+
+            var storage = window.localStorage;
+            var maxResultId = 0;
+
+            function getAllResult(){
+                var result = [];
+                for(var i=0; i<storage.length; i++){
+                    var key = storage.key(i);
+                    var resultId = parseInt(key, 10);
+                    if (resultId > maxResultId)
+                        maxResultId = resultId;
+                    var value = storage.getItem(key);
+                    var resultObjData = angular.fromJson(value);
+                    result.push(factResult(resultObjData));
+                }
+                return result;
+            }
+
+            function saveResult(result){
+                if (!result.id)
+                    result.id = ++maxResultId;
+                storage.setItem(result.id, angular.toJson(result));
+            }
+
+            function deleteResult(result){
+                storage.removeItem(result.id);
+            }
+
+            return {
+                getAll : getAllResult,
+                save : saveResult,
+                remove : deleteResult
+            };
+
+        });
+
+        appRC.controller("ctrlReportCard", ["$scope" , "factResult", "factResultStorage", function ($scope, factResult, factResultStorage) {
+
+            $scope.results = factResultStorage.getAll();
+
+            /*
+                [
+                    {
+                        id: 1,
+                        name: "Anand Dev",
+                        marks: 35
+                    },
+                    {
+                        id: 2,
+                        name: "Sam hog",
+                        marks: 90
+                    },
+                    {
+                        id: 3,
+                        name: "John Will",
+                        marks: 65
+                    }
+                        ]
+            */
+
+            $scope.addNewResult = function(newName, newMarks){
+                var newResult = factResult({name : newName, marks: newMarks});
+                factResultStorage.save(newResult);
+                $scope.results.push(newResult);
+            };
+            $scope.editResult = function(result){
+                result.toggle();
+                factResultStorage.save(result);
+            };
+            $scope.removeClosed = function(){
+               for(var i=$scope.results.length-1; i>=0; i--){
+                   var result = $scope.results[i];
+                   if (result.isSelected){
+                       factResultStorage.remove(result);
+                       $scope.results.splice(i,1);
+                   }
+               }
+            };
+
+
+            /*$scope.studentsResult = {
+                result: [
+                    {
+                        id: 1,
+                        name: "Anand Dev",
+                        marks: 35
+                    },
+                    {
+                        id: 2,
+                        name: "Sam hog",
+                        marks: 90
+                    },
+                    {
+                        id: 3,
+                        name: "John Will",
+                        marks: 65
+                    }
                         ],
-                        selected: {}
-                    };
+                selected: {}
+            };*/
 
-                    // gets the template to ng-include for a table row / item
-                    $scope.getTemplate = function (result) {
-                        if (result.id === $scope.studentsResult.selected.id) 
-                            return './templates/edit-record.html';
-                        else 
-                            return './templates/display-record.html';
-                    };
+            // gets the template to ng-include for a table row / item
+            $scope.getTemplate = function (result) {
+                if ($scope.results.isSelected)
+                    return './templates/edit-record.html';
+                else
+                    return './templates/display-record.html';
+            };
 
-                    $scope.editContact = function (record) {                        
-                        $scope.studentsResult.selected = angular.copy(record);
-                    };
+           /* $scope.editContact = function (record) {
+                $scope.studentsResult.selected = angular.copy(record);
+            };
 
-                    $scope.saveContact = function (idx) {
-                        debugger;
-                        console.log("Saving contact");
-                        $scope.studentsResult.result[idx] = angular.copy($scope.studentsResult.selected);
-                        $scope.reset();
-                    };
+            $scope.saveContact = function (idx) {
+                console.log("Saving contact");
+                $scope.studentsResult.result[idx] = angular.copy($scope.studentsResult.selected);
+                $scope.reset();
+            };*/
 
-                    $scope.reset = function () {
-                        $scope.studentsResult.selected = {};
-                    };
-                });
+            /*$scope.reset = function () {
+                $scope.studentsResult.selected = {};
+            };*/
+        }]);
     </script>
 </body>
 
