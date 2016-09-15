@@ -776,32 +776,6 @@ a:active {
 }
 
 
-/* New record table*/
-
-.index-table table.new td.name {
-    width: 65%;
-}
-
-.index-table table.new td.name input {
-    width: 350px;
-}
-
-.index-table table.new td.marks {
-    width: 15%;
-    text-align: center;
-}
-
-.index-table table.new td.marks input {
-    width: 100px;
-    text-align: center;
-}
-
-.index-table table.new td:last-child {
-    width: 15%;
-    text-align: center;
-}
-
-
 /* Results table*/
 
 .index-table table.result td:first-child {
@@ -818,7 +792,7 @@ a:active {
 }
 
 .index-table table.result td.name input {
-    width: 350px;
+    width: 250px;
 }
 
 .index-table table.result td.marks {
@@ -827,7 +801,7 @@ a:active {
 }
 
 .index-table table.result td.marks input {
-    width: 100px;
+    width: 90px;
     text-align: center;
 }
 
@@ -856,4 +830,35 @@ a:active {
 
 #footer {
     background-color: gainsboro;
+}
+
+.visuallyhidden {
+    border: 0;
+    clip: rect(0 0 0 0);
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    padding: 0;
+    position: absolute;
+    width: 1px;    
+}
+
+.message {
+    width: 100%;
+    text-indent: 10px;
+    font-size: 14px;
+    border-radius: 5px;
+    padding: 10px 0;
+}
+
+.success {
+    color: green;
+    border: 1px solid green;
+    background-color: #e5ffe5;
+}
+
+.error {
+    color: red;
+    border: 1px solid red;
+    background-color: #ffdddf;
 }

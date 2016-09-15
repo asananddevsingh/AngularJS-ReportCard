@@ -11,7 +11,7 @@
     {{result.marks}}
 </td>
 <td class="status">
-    <img src="./assets/img/circle-red.png" alt="Status">
+    <img src="./assets/img/circle-{{ result.isPassed ? 'green' : 'red'}}.png" alt="Status">
 </td>
 <td class="edit">
     <img src="./assets/img/edit-24.png" ng-click="editResult(result)" alt="Edit/Save">

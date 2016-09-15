@@ -30,6 +30,7 @@
     <!--<script src="assets/js/libs/modernizr-2.6.2.min.js"></script>-->
 
     <script src="./assets/js/libs/angular.min.js"></script>
+    <script src="./assets/js/libs/jquery-2.2.3.min.js"></script>
 
 </head>
 
@@ -42,21 +43,24 @@
                         <div id="content-container" class="clearfix index-table">
                             <div id="content-main">
                                 <h1>Report Card</h1>
-                                <table class="new">
+                                <div id="message" class="{{messageClass}}">
+                                    {{message}}
+                                </div>
+                                <table class="result">
                                     <thead>
                                         <tr>
-                                            <th colspan="3">Add new record</th>
+                                            <th colspan="6">Add new record</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <tr>
-                                            <td class="name">
-                                                <input type="text" required placeholder="Student's name" ng-model="name">
+                                            <td class="name" colspan="3">
+                                                <input type="text" placeholder="Student's name" ng-model="name">
                                             </td>
                                             <td class="marks">
-                                                <input type="number" required placeholder="marks" ng-model="marks">
+                                                <input type="number" placeholder="marks" ng-model="marks">
                                             </td>
-                                            <td class="edit">
+                                            <td class="edit" colspan="2">
                                                 <input type="button" class="submit button primary" value="Submit" ng-click="addNewResult(name, marks)">
                                             </td>
                                         </tr>
@@ -89,13 +93,13 @@
                                     <tbody>
                                         <tr>
                                             <td>
-                                                Mimimum:
+                                                <b>Mimimum: {{minimum}}</b>
                                             </td>
                                             <td>
-                                                Average:
+                                                <b>Average: {{average}}</b>
                                             </td>
                                             <td>
-                                                Maximum:
+                                                <b>Maximum: {{maximum}}</b>
                                             </td>
                                         </tr>
                                     </tbody>
@@ -113,30 +117,47 @@
         </div>
     </form>
     <script type="text/javascript">
+            
+        Array.prototype.min = function () {            
+            return (!isFinite(Math.min.apply(Math, this)) ? 0 :  Math.min.apply(null, this)) ;
+        };
+        
+        Array.prototype.avg = function () {            
+            var sum = this.reduce(function(a, b) { return a + b; }, 0);            
+            return sum === 0 ? 0 : parseFloat(sum/this.length).toFixed(2);
+        };
+        
+        Array.prototype.max = function () {
+            return (!isFinite(Math.max.apply(Math, this)) ? 0 :  Math.max.apply(null, this)) ;
+        };
+
         var appRC = angular.module("appReportCard", []);
 
         appRC.factory("factResult", function () {
-            function Result(){}
-            Result.prototype.toggle = function(){
+            function Result() {}
+            Result.prototype.toggle = function () {
                 this.isSelected = !this.isSelected;
+                this.isPassed = this.marks < 65 ? false : true;
             }
-            return function (defaults){
+
+            return function (defaults) {
                 var result = new Result();
                 result.id = defaults.id;
-                result.name = defaults.name || '';
-                result.marks = defaults.marks || 0;
+                result.name = defaults.name || 'N/A';
+                result.marks = parseInt(defaults.marks, 10) || 0;
+                result.isPassed = defaults.marks < 65 ? false : true;
                 return result;
             }
         })
 
-        appRC.factory("factResultStorage", function(factResult){
+        appRC.factory("factResultStorage", ["factResult", function (factResult) {
 
             var storage = window.localStorage;
             var maxResultId = 0;
 
-            function getAllResult(){
+            function getAllResult() {
                 var result = [];
-                for(var i=0; i<storage.length; i++){
+                for (var i = 0; i < storage.length; i++) {
                     var key = storage.key(i);
                     var resultId = parseInt(key, 10);
                     if (resultId > maxResultId)
@@ -148,110 +169,99 @@
                 return result;
             }
 
-            function saveResult(result){
+            function saveResult(result) {
                 if (!result.id)
                     result.id = ++maxResultId;
                 storage.setItem(result.id, angular.toJson(result));
             }
 
-            function deleteResult(result){
-                storage.removeItem(result.id);
+            function editResult(result) {
+                storage.setItem(result.id, angular.toJson(result));
             }
 
             return {
-                getAll : getAllResult,
-                save : saveResult,
-                remove : deleteResult
+                getAll: getAllResult,
+                save: saveResult,
+                edit: editResult
             };
 
-        });
+        }]);
 
-        appRC.controller("ctrlReportCard", ["$scope" , "factResult", "factResultStorage", function ($scope, factResult, factResultStorage) {
+        appRC.factory("factCalculate", ["factResultStorage", function (factResultStorage) {
+
+            return function (results) {
+                var marks = [];
+                
+                results.map(function (result) {
+                    marks.push(result.marks);
+                });
+
+                return {
+                    min: marks.min(),
+                    avg: marks.avg(),
+                    max: marks.max()
+                }
+            }
+        }])
+
+        appRC.controller("ctrlReportCard", ["$scope", "factResult", "factResultStorage", "factCalculate", function ($scope, factResult, factResultStorage, factCalculate) {
 
             $scope.results = factResultStorage.getAll();
-
-            /*
-                [
-                    {
-                        id: 1,
-                        name: "Anand Dev",
-                        marks: 35
-                    },
-                    {
-                        id: 2,
-                        name: "Sam hog",
-                        marks: 90
-                    },
-                    {
-                        id: 3,
-                        name: "John Will",
-                        marks: 65
-                    }
-                        ]
-            */
-
-            $scope.addNewResult = function(newName, newMarks){
-                var newResult = factResult({name : newName, marks: newMarks});
-                factResultStorage.save(newResult);
-                $scope.results.push(newResult);
+            $scope.messageClass = 'visuallyhidden';
+            setMarksSummary();
+            $scope.addNewResult = function (newName, newMarks) {
+                if (newName && newMarks) {
+                    var newResult = factResult({
+                        name: newName,
+                        marks: parseInt(newMarks, 10)
+                    });
+                    factResultStorage.save(newResult);
+                    $scope.results.push(newResult);                    
+                    setMessage("message success", "Record have been saved successfully.");
+                    clear();
+                    setMarksSummary();
+                } else {
+                    setMessage("message error", "Please enter some value.");
+                }                
             };
-            $scope.editResult = function(result){
+
+            $scope.editResult = function (result) {
                 result.toggle();
-                factResultStorage.save(result);
-            };
-            $scope.removeClosed = function(){
-               for(var i=$scope.results.length-1; i>=0; i--){
-                   var result = $scope.results[i];
-                   if (result.isSelected){
-                       factResultStorage.remove(result);
-                       $scope.results.splice(i,1);
-                   }
-               }
             };
 
+            $scope.saveEditedResult = function (result) {
+                result.toggle();                
+                factResultStorage.edit(result);
+                setMarksSummary();
+            };
 
-            /*$scope.studentsResult = {
-                result: [
-                    {
-                        id: 1,
-                        name: "Anand Dev",
-                        marks: 35
-                    },
-                    {
-                        id: 2,
-                        name: "Sam hog",
-                        marks: 90
-                    },
-                    {
-                        id: 3,
-                        name: "John Will",
-                        marks: 65
-                    }
-                        ],
-                selected: {}
-            };*/
-
-            // gets the template to ng-include for a table row / item
             $scope.getTemplate = function (result) {
-                if ($scope.results.isSelected)
+                if (result.isSelected)
                     return './templates/edit-record.html';
                 else
                     return './templates/display-record.html';
             };
 
-           /* $scope.editContact = function (record) {
-                $scope.studentsResult.selected = angular.copy(record);
-            };
+            function clear() {
+                $scope.name = '';
+                $scope.marks = '';
+            }
 
-            $scope.saveContact = function (idx) {
-                console.log("Saving contact");
-                $scope.studentsResult.result[idx] = angular.copy($scope.studentsResult.selected);
-                $scope.reset();
-            };*/
+            function setMessage(className, message) {
+                $('#message').fadeIn();
+                $scope.messageClass = className;
+                $scope.message = message;
+                setTimeout(function () {
+                    $('#message').fadeOut();
+                }, 1500)
+            }
 
-            /*$scope.reset = function () {
-                $scope.studentsResult.selected = {};
-            };*/
+            function setMarksSummary() {                
+                var marks = factCalculate($scope.results);
+                $scope.minimum = marks.min;
+                $scope.average = marks.avg;
+                $scope.maximum = marks.max;
+            }
         }]);
     </script>
 </body>
