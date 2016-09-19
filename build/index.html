@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<!--[if lt IE 8]><html class="no-js lt-ie10 lt-ie9 lt-ie8" lang="en"><![endif]-->
+<!--[if IE 8]><html class="no-js lt-ie10 lt-ie9" lang="en"><![endif]-->
+<!--[if IE 9]><html class="no-js lt-ie10" lang="en"><![endif]-->
+<!--[if gt IE 9]><!-->
+<html class="no-js" lang="en">
+<!--<![endif]-->
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="format-detection" content="telephone=no">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+
+    <link href="favicon.ico" rel="shortcut icon" type="image/x-icon" />
+
+    <title>Report Card | Global Logic</title>
+
+    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1" />
+    <!--[if !IE]><!-->
+    <link rel="stylesheet" href="assets/css/style.css" />
+    <!--<![endif]-->
+    <!--[if lte IE 8]>
+	<link rel="stylesheet" type="text/css" href="assets/css/style.static.css" />
+	<link rel="stylesheet" type="text/css" media="print" href="assets/css/print.css" />
+	<![endif]-->
+    <!--[if gt IE 8]>
+	<link rel="stylesheet" type="text/css" href="assets/css/style.css" />
+	<![endif]-->
+
+    <!--<script src="assets/js/libs/modernizr-2.6.2.min.js"></script>-->
+
+    <script src="./assets/js/libs/angular.min.js"></script>
+    <script src="./assets/js/libs/jquery-2.2.3.min.js"></script>
+
+</head>
+
+<body>
+    <form>
+        <div id="outer-wrap">
+            <div id="inner-wrap">
+                <div id="main" class="purple l-one-column" role="main" tabindex="0" ng-app="appReportCard" ng-controller="ctrlReportCard">
+                    <div class="l-margins">
+                        <div id="content-container" class="clearfix index-table">
+                            <div id="content-main">
+                                <h1>Report Card</h1>
+                                <div id="message" class="{{messageClass}}">
+                                    {{message}}
+                                </div>
+                                <table class="result">
+                                    <thead>
+                                        <tr>
+                                            <th colspan="6">Add new record</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td class="name" colspan="3">
+                                                <input type="text" placeholder="Student's name" ng-model="name">
+                                            </td>
+                                            <td class="marks">
+                                                <input type="number" placeholder="marks" ng-model="marks">
+                                            </td>
+                                            <td class="edit" colspan="2">
+                                                <input type="button" class="submit button primary" value="Submit" ng-click="addNewResult(name, marks)">
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <hr>
+                                <div>
+                                    <h4>Student summary</h4>
+                                </div>
+                                <table class="result">
+                                    <thead>
+                                        <tr>
+                                            <th>Id</th>
+                                            <th>Avatar</th>
+                                            <th>Name</th>
+                                            <th>Marks</th>
+                                            <th>Grade</th>
+                                            <th>Edit/Save</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr ng-repeat="result in results" ng-include="getTemplate(result)"></tr>                        
+                                    </tbody>
+                                </table>
+                                <hr>
+                                <table class="marks">
+                                    <thead>
+                                        <tr>
+                                            <th colspan="3">Marks summary</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>
+                                                <b>Mimimum: {{minimum}}</b>
+                                            </td>
+                                            <td>
+                                                <b>Average: {{average}}</b>
+                                            </td>
+                                            <td>
+                                                <b>Maximum: {{maximum}}</b>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="footer" role="contentinfo">
+                    <div class="l-margins footer-padding clearfix">
+                        <div class="author">Author: Anand Dev Singh | Global Logic | ananddev.singh@globallogic.com</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+    <script src="./assets/js/custom/script.js"></script>
+</body>
+
+</html>
